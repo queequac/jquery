@@ -12,17 +12,17 @@ var output,
 	outputB = addToOutput( "B" ),
 	outputC = addToOutput( "C" ),
 	tests = {
-		"":							"XABC 	X		XABCABCC 	X 	XBB X	XABA	X",
-		"once":						"XABC 	X 		X 			X 	X 	X	XABA	X",
-		"memory":					"XABC 	XABC 	XABCABCCC 	XA 	XBB	XB	XABA	XC",
-		"unique":					"XABC 	X		XABCA		X	XBB	X	XAB		X",
-		"stopOnFalse":				"XABC 	X		XABCABCC	X	XBB	X	XA		X",
-		"once memory":				"XABC 	XABC	X			XA	X	XA	XABA	XC",
-		"once unique":				"XABC 	X		X			X	X	X	XAB		X",
-		"once stopOnFalse":			"XABC 	X		X			X	X	X	XA		X",
-		"memory unique":			"XABC 	XA		XABCA		XA	XBB	XB	XAB		XC",
-		"memory stopOnFalse":		"XABC 	XABC	XABCABCCC	XA	XBB	XB	XA		X",
-		"unique stopOnFalse":		"XABC 	X		XABCA		X	XBB	X	XA		X"
+		"":                   "XABC   X     XABCABCC  X  XBB X   XABA  X",
+		"once":               "XABC   X     X         X  X   X   XABA  X",
+		"memory":             "XABC   XABC  XABCABCCC XA XBB XB  XABA  XC",
+		"unique":             "XABC   X     XABCA     X  XBB X   XAB   X",
+		"stopOnFalse":        "XABC   X     XABCABCC  X  XBB X   XA    X",
+		"once memory":        "XABC   XABC  X         XA X   XA  XABA  XC",
+		"once unique":        "XABC   X     X         X  X   X   XAB   X",
+		"once stopOnFalse":   "XABC   X     X         X  X   X   XA    X",
+		"memory unique":      "XABC   XA    XABCA     XA XBB XB  XAB   XC",
+		"memory stopOnFalse": "XABC   XABC  XABCABCCC XA XBB XB  XA    X",
+		"unique stopOnFalse": "XABC   X     XABCA     X  XBB X   XA    X"
 	},
 	filters = {
 		"no filter": undefined,
@@ -209,14 +209,14 @@ test( "jQuery.Callbacks( options ) - options are copied", function() {
 	expect( 1 );
 
 	var options = {
-			unique: true
+			"unique": true
 		},
 		cb = jQuery.Callbacks( options ),
 		count = 0,
 		fn = function() {
 			ok( !( count++ ), "called once" );
 		};
-	options.unique = false;
+	options["unique"] = false;
 	cb.add( fn, fn );
 	cb.fire();
 });
@@ -249,4 +249,13 @@ test( "jQuery.Callbacks.remove - should remove all instances", function() {
 	cb.add( fn, fn, function() {
 		ok( true, "end of test" );
 	}).remove( fn ).fire();
+});
+
+test( "jQuery.Callbacks() - adding a string doesn't cause a stack overflow", function() {
+
+	expect( 1 );
+
+	jQuery.Callbacks().add( "hello world" );
+
+	ok( true, "no stack overflow" );
 });

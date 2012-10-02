@@ -6,43 +6,46 @@ test("boxModel", function() {
 	equal( jQuery.support.boxModel, document.compatMode === "CSS1Compat" , "jQuery.support.boxModel is sort of tied to quirks mode but unstable since 1.8" );
 });
 
-testIframeWithCallback( "body background is not lost if set prior to loading jQuery (#9238)", "support/bodyBackground", function( color, support ) {
-	expect( 2 );
-	var i,
-		passed = true,
-		okValue = {
-			"#000000": true,
-			"rgb(0, 0, 0)": true
-		};
-	ok( okValue[ color ], "color was not reset (" + color + ")" );
+if ( jQuery.css ) {
+	testIframeWithCallback( "body background is not lost if set prior to loading jQuery (#9238)", "support/bodyBackground.html", function( color, support ) {
+		expect( 2 );
+		var i,
+			passed = true,
+			okValue = {
+				"#000000": true,
+				"rgb(0, 0, 0)": true
+			};
+		ok( okValue[ color ], "color was not reset (" + color + ")" );
 
-	for ( i in jQuery.support ) {
-		if ( jQuery.support[ i ] !== support[ i ] ) {
-			passed = false;
-			strictEqual( jQuery.support[ i ], support[ i ], "Support property " + i + " is different" );
+		for ( i in jQuery.support ) {
+			if ( jQuery.support[ i ] !== support[ i ] ) {
+				passed = false;
+				strictEqual( jQuery.support[ i ], support[ i ], "Support property " + i + " is different" );
+			}
 		}
-	}
-	for ( i in support ) {
-		if ( !( i in jQuery.support ) ) {
-			passed = false;
-			strictEqual( jQuery.support[ i ], support[ i ], "Unexpected property: " + i );
+		for ( i in support ) {
+			if ( !( i in jQuery.support ) ) {
+				passed = false;
+				strictEqual( jQuery.support[ i ], support[ i ], "Unexpected property: " + i );
+			}
 		}
-	}
-	ok( passed, "Same support properties" );
-});
+		ok( passed, "Same support properties" );
+	});
+}
 
-testIframeWithCallback( "A background on the testElement does not cause IE8 to crash (#9823)", "support/testElementCrash", function() {
+testIframeWithCallback( "A background on the testElement does not cause IE8 to crash (#9823)", "support/testElementCrash.html", function() {
 	expect(1);
 	ok( true, "IE8 does not crash" );
 });
 
-var userAgent = window.navigator.userAgent;
+(function() {
 
-// These tests do not have to stay
-// They are here to help with upcoming support changes for 1.8
-if ( /chrome\/19\.0/i.test(userAgent) ) {
-	test("Verify that the support tests resolve as expected per browser", function() {
-		var i,
+	var userAgent = window.navigator.userAgent,
+		expected;
+
+	// These tests do not have to stay
+	// They are here to help with upcoming support changes for 1.8
+	if ( /chrome\/19\.0/i.test(userAgent) ) {
 		expected = {
 			"leadingWhitespace":true,
 			"tbody":true,
@@ -75,13 +78,7 @@ if ( /chrome\/19\.0/i.test(userAgent) ) {
 			"cors":true,
 			"doesNotIncludeMarginInBodyOffset":true
 		};
-		for ( i in expected ) {
-			equal( jQuery.support[i], expected[i], "jQuery.support['" + i + "']: " + jQuery.support[i] + ", expected['" + i + "']: " + expected[i]);
-		}
-	});
-} else if ( /msie 8\.0/i.test(userAgent) ) {
-	test("Verify that the support tests resolve as expected per browser", function() {
-		var i,
+	} else if ( /msie 8\.0/i.test(userAgent) ) {
 		expected = {
 			"leadingWhitespace":false,
 			"tbody":true,
@@ -114,13 +111,7 @@ if ( /chrome\/19\.0/i.test(userAgent) ) {
 			"cors":false,
 			"doesNotIncludeMarginInBodyOffset":true
 		};
-		for ( i in expected ) {
-			equal( jQuery.support[i], expected[i], "jQuery.support['" + i + "']: " + jQuery.support[i] + ", expected['" + i + "']: " + expected[i]);
-		}
-	});
-} else if ( /msie 7\.0/i.test(userAgent) ) {
-	test("Verify that the support tests resolve as expected per browser", function() {
-		var i,
+	} else if ( /msie 7\.0/i.test(userAgent) ) {
 		expected = {
 			"ajax": true,
 			"appendChecked": false,
@@ -153,13 +144,7 @@ if ( /chrome\/19\.0/i.test(userAgent) ) {
 			"tbody": false,
 			"style": false
 		};
-		for ( i in expected ) {
-			equal( jQuery.support[i], expected[i], "jQuery.support['" + i + "']: " + jQuery.support[i] + ", expected['" + i + "']: " + expected[i]);
-		}
-	});
-} else if ( /msie 6\.0/i.test(userAgent) ) {
-	test("Verify that the support tests resolve as expected per browser", function() {
-		var i,
+	} else if ( /msie 6\.0/i.test(userAgent) ) {
 		expected = {
 			"leadingWhitespace":false,
 			"tbody":false,
@@ -192,13 +177,7 @@ if ( /chrome\/19\.0/i.test(userAgent) ) {
 			"cors":false,
 			"doesNotIncludeMarginInBodyOffset":true
 		};
-		for ( i in expected ) {
-			equal( jQuery.support[i], expected[i], "jQuery.support['" + i + "']: " + jQuery.support[i] + ", expected['" + i + "']: " + expected[i]);
-		}
-	});
-} else if ( /5\.1\.1 safari/i.test(userAgent) ) {
-	test("Verify that the support tests resolve as expected per browser", function() {
-		var i,
+	} else if ( /5\.1\.1 safari/i.test(userAgent) ) {
 		expected = {
 			"leadingWhitespace":true,
 			"tbody":true,
@@ -231,13 +210,7 @@ if ( /chrome\/19\.0/i.test(userAgent) ) {
 			"cors":true,
 			"doesNotIncludeMarginInBodyOffset":true
 		};
-		for ( i in expected ) {
-			equal( jQuery.support[i], expected[i], "jQuery.support['" + i + "']: " + jQuery.support[i] + ", expected['" + i + "']: " + expected[i]);
-		}
-	});
-} else if ( /firefox\/3\.6/i.test(userAgent) ) {
-	test("Verify that the support tests resolve as expected per browser", function() {
-		var i,
+	} else if ( /firefox\/3\.6/i.test(userAgent) ) {
 		expected = {
 			"leadingWhitespace":true,
 			"tbody":true,
@@ -270,8 +243,16 @@ if ( /chrome\/19\.0/i.test(userAgent) ) {
 			"cors":true,
 			"doesNotIncludeMarginInBodyOffset":true
 		};
-		for ( i in expected ) {
-			equal( jQuery.support[i], expected[i], "jQuery.support['" + i + "']: " + jQuery.support[i] + ", expected['" + i + "']: " + expected[i]);
-		}
-	});
-}
+	}
+
+	if ( expected ) {
+		test("Verify that the support tests resolve as expected per browser", function() {
+			for ( var i in expected ) {
+				if ( jQuery.ajax || i !== "ajax" && i !== "cors" ) {
+					equal( jQuery.support[i], expected[i], "jQuery.support['" + i + "']: " + jQuery.support[i] + ", expected['" + i + "']: " + expected[i]);
+				}
+			}
+		});
+	}
+
+})();

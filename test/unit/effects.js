@@ -1,3 +1,5 @@
+if ( jQuery.fx ) {
+
 module("effects", { teardown: moduleTeardown });
 
 test("sanity check", function() {
@@ -6,7 +8,7 @@ test("sanity check", function() {
 });
 
 test("show()", function() {
-	expect(28);
+	expect(26);
 
 	var hiddendiv = jQuery("div.hidden");
 
@@ -35,21 +37,24 @@ test("show()", function() {
 	var pass = true;
 	div = jQuery("#qunit-fixture div");
 	div.show().each(function(){
-		if ( this.style.display == "none" ) pass = false;
+		if ( this.style.display == "none" ) {
+			pass = false;
+		}
 	});
 	ok( pass, "Show" );
 
 	var speeds = {
 		"null speed": null,
 		"undefined speed": undefined,
-		"empty string speed": "",
 		"false speed": false
 	};
 
 	jQuery.each(speeds, function(name, speed) {
 		pass = true;
 		div.hide().show(speed).each(function() {
-			if ( this.style.display == "none" ) pass = false;
+			if ( this.style.display == "none" ) {
+				pass = false;
+			}
 		});
 		ok( pass, "Show with " + name);
 	});
@@ -89,6 +94,8 @@ test("show()", function() {
 		var elem = jQuery(selector, "#show-tests").show();
 		equal( elem.css("display"), expected, "Show using correct display type for " + selector );
 	});
+
+	jQuery("#show-tests").remove();
 
 	// Make sure that showing or hiding a text node doesn't cause an error
 	jQuery("<div>test</div> text <span>test</span>").show().remove();
@@ -132,6 +139,8 @@ test("show(Number) - other displays", function() {
 			}
 		});
 	});
+
+	jQuery("#show-tests").remove();
 });
 
 
@@ -167,82 +176,6 @@ test("Persist correct display value", function() {
 	});
 });
 
-test("show() resolves correct default display #8099", function() {
-	expect(7);
-	var tt8099 = jQuery("<tt/>").appendTo("body"),
-			dfn8099 = jQuery("<dfn/>", { html: "foo"}).appendTo("body");
-
-	equal( tt8099.css("display"), "none", "default display override for all tt" );
-	equal( tt8099.show().css("display"), "inline", "Correctly resolves display:inline" );
-
-	equal( jQuery("#foo").hide().show().css("display"), "block", "Correctly resolves display:block after hide/show" );
-
-	equal( tt8099.hide().css("display"), "none", "default display override for all tt" );
-	equal( tt8099.show().css("display"), "inline", "Correctly resolves display:inline" );
-
-	equal( dfn8099.css("display"), "none", "default display override for all dfn" );
-	equal( dfn8099.show().css("display"), "inline", "Correctly resolves display:inline" );
-
-	tt8099.remove();
-	dfn8099.remove();
-
-});
-
-test( "show() resolves correct default display, detached nodes (#10006)", function(){
-	// Tests originally contributed by Orkel in
-	// https://github.com/jquery/jquery/pull/458
-	expect( 11 );
-
-	var div, span;
-
-	div = jQuery("<div class='hidden'>");
-	div.show().appendTo("#qunit-fixture");
-	equal( div.css("display"), "block", "Make sure a detached, pre-hidden( through stylesheets ) div is visible." );
-
-	div = jQuery("<div style='display: none'>");
-	div.show().appendTo("#qunit-fixture");
-	equal( div.css("display"), "block", "Make sure a detached, pre-hidden( through inline style ) div is visible." );
-
-	span = jQuery("<span class='hidden'/>");
-	span.show().appendTo("#qunit-fixture");
-	equal( span.css("display"), "inline", "Make sure a detached, pre-hidden( through stylesheets ) span has default display." );
-
-	span = jQuery("<span style='display: inline'/>");
-	span.show().appendTo("#qunit-fixture");
-	equal( span.css("display"), "inline", "Make sure a detached, pre-hidden( through inline style ) span has default display." );
-
-	div = jQuery("<div><div class='hidden'></div></div>").children("div");
-	div.show().appendTo("#qunit-fixture");
-	equal( div.css("display"), "block", "Make sure a detached, pre-hidden( through stylesheets ) div inside another visible div is visible." );
-
-	div = jQuery("<div><div style='display: none'></div></div>").children("div");
-	div.show().appendTo("#qunit-fixture");
-	equal( div.css("display"), "block", "Make sure a detached, pre-hidden( through inline style ) div inside another visible div is visible." );
-
-	div = jQuery("div.hidden");
-	div.detach().show();
-	equal( div.css("display"), "block", "Make sure a detached( through detach() ), pre-hidden div is visible." );
-	div.remove();
-
-	span = jQuery("<span>");
-	span.appendTo("#qunit-fixture").detach().show().appendTo("#qunit-fixture" );
-	equal( span.css("display"), "inline", "Make sure a detached( through detach() ), pre-hidden span has default display." );
-	span.remove();
-
-	div = jQuery("<div>");
-	div.show().appendTo("#qunit-fixture");
-	ok( !!div.get( 0 ).style.display, "Make sure not hidden div has a inline style." );
-
-	div = jQuery( document.createElement("div") );
-	div.show().appendTo("#qunit-fixture");
-	equal( div.css("display"), "block", "Make sure a pre-created element has default display." );
-
-	div = jQuery("<div style='display: inline'/>");
-	div.show().appendTo("#qunit-fixture");
-	equal( div.css("display"), "inline", "Make sure that element has same display when it was created." );
-});
-
-
 test("animate(Hash, Object, Function)", function() {
 	expect(1);
 	stop();
@@ -266,7 +199,16 @@ test("animate negative height", function() {
 test("animate negative margin", function() {
 	expect(1);
 	stop();
-	jQuery("#foo").animate({ marginTop: -100 }, 100, function() {
+	jQuery("#foo").animate({ "marginTop": -100 }, 100, function() {
+		equal( jQuery(this).css("marginTop"), "-100px", "Verify margin." );
+		start();
+	});
+});
+
+test("animate negative margin with px", function() {
+	expect(1);
+	stop();
+	jQuery("#foo").animate({ marginTop: "-100px" }, 100, function() {
 		equal( jQuery(this).css("marginTop"), "-100px", "Verify margin." );
 		start();
 	});
@@ -275,7 +217,7 @@ test("animate negative margin", function() {
 test("animate negative padding", function() {
 	expect(1);
 	stop();
-	jQuery("#foo").animate({ paddingBottom: -100 }, 100, function() {
+	jQuery("#foo").animate({ "paddingBottom": -100 }, 100, function() {
 		equal( jQuery(this).css("paddingBottom"), "0px", "Verify paddingBottom." );
 		start();
 	});
@@ -405,8 +347,8 @@ test("animate percentage(%) on width/height", function() {
 	stop();
 	$div.animate({ width: "25%", height: "25%" }, 13, function() {
 		var $this = jQuery(this);
-		equal( $this.width(), 15, "Width was animated to 15px rather than 25px");
-		equal( $this.height(), 15, "Height was animated to 15px rather than 25px");
+		equal( $this.css("width"), "15px", "Width was animated to 15px rather than 25px");
+		equal( $this.css("height"), "15px", "Height was animated to 15px rather than 25px");
 		start();
 	});
 });
@@ -480,11 +422,10 @@ asyncTest( "animate option { queue: true }", function() {
 	notEqual( foo.queue().length, 0, "Default queue is not empty" );
 });
 
-
 asyncTest( "animate option { queue: 'name' }", function() {
 	expect( 5 );
 	var foo = jQuery( "#foo" ),
-		origWidth = foo.width(),
+		origWidth = parseFloat( foo.css("width") ),
 		order = [];
 
 	foo.animate( { width: origWidth + 100 }, {
@@ -494,7 +435,7 @@ asyncTest( "animate option { queue: 'name' }", function() {
 
 			// second callback function
 			order.push( 2 );
-			equal( foo.width(), origWidth + 100, "Animation ended" );
+			equal( parseFloat( foo.css("width") ), origWidth + 100, "Animation ended" );
 			equal( foo.queue("name").length, 1, "Queue length of 'name' queue" );
 		}
 	}).queue( "name", function( next ) {
@@ -508,7 +449,7 @@ asyncTest( "animate option { queue: 'name' }", function() {
 
 		// this is the first callback function that should be called
 		order.push( 1 );
-		equal( foo.width(), origWidth, "Animation does not start on its own." );
+		equal( parseFloat( foo.css("width") ), origWidth, "Animation does not start on its own." );
 		equal( foo.queue("name").length, 2, "Queue length of 'name' queue" );
 		foo.dequeue( "name" );
 	}, 100 );
@@ -611,27 +552,30 @@ test("animate non-element", function() {
 });
 
 test("stop()", function() {
-	expect(4);
+	expect( 4 );
 	stop();
 
-	var $foo = jQuery("#foo");
-	var w = 0;
+	var $foo = jQuery("#foo"),
+		tests = 2,
+		w = 0;
 
-	$foo.hide().width(200)
-		.animate({ width: "show" }, 1000);
+	$foo.hide().css( "width", 200 )
+		.animate( { "width": "show" }, 1500 );
 
 	setTimeout(function() {
-		var nw = $foo.width();
-		notEqual( nw, w, "An animation occurred " + nw + "px " + w + "px");
+		var nw = $foo.css("width");
+		notEqual( parseFloat( nw ), w, "An animation occurred " + nw + " " + w + "px" );
 		$foo.stop();
 
-		nw = $foo.width();
-		notEqual( nw, w, "Stop didn't reset the animation " + nw + "px " + w + "px");
+		nw = $foo.css("width");
+		notEqual( parseFloat( nw ), w, "Stop didn't reset the animation " + nw + " " + w + "px" );
 		setTimeout(function() {
 			$foo.removeData();
 			$foo.removeData(undefined, true);
-			equal( nw, $foo.width(), "The animation didn't continue" );
-			start();
+			equal( nw, $foo.css("width"), "The animation didn't continue" );
+			if ( --tests === 0 ) {
+				start();
+			}
 		}, 100);
 	}, 100);
 
@@ -645,6 +589,9 @@ test("stop()", function() {
 			equal( $two.css("opacity"), "0", "Stop does not interfere with animations on other elements (#6641)" );
 			// Reset styles
 			$one.add( $two ).css("opacity", "");
+			if ( --tests === 0 ) {
+				start();
+			}
 		});
 	}, 50);
 });
@@ -655,23 +602,23 @@ test("stop() - several in queue", function() {
 
 	var $foo = jQuery("#foo");
 	var w = 0;
-	$foo.hide().width(200).width();
+	$foo.hide().css( "width", 200 ).css("width");
 
-	$foo.animate({ width: "show" }, 1000);
-	$foo.animate({ width: "hide" }, 1000);
-	$foo.animate({ width: "show" }, 1000);
+	$foo.animate({ "width": "show" }, 1500);
+	$foo.animate({ "width": "hide" }, 1000);
+	$foo.animate({ "width": "show" }, 1000);
 	setTimeout(function(){
 		equal( $foo.queue().length, 3, "All 3 still in the queue" );
-		var nw = $foo.width();
-		notEqual( nw, w, "An animation occurred " + nw + "px " + w + "px");
+		var nw = $foo.css("width");
+		notEqual( parseFloat( nw ), w, "An animation occurred " + nw + " " + w + "px");
 		$foo.stop();
 
-		nw = $foo.width();
-		notEqual( nw, w, "Stop didn't reset the animation " + nw + "px " + w + "px");
+		nw = $foo.css("width");
+		notEqual( parseFloat( nw ), w, "Stop didn't reset the animation " + nw + " " + w + "px");
 
 		$foo.stop(true);
 		start();
-	}, 100);
+	}, 200);
 });
 
 test("stop(clearQueue)", function() {
@@ -680,22 +627,22 @@ test("stop(clearQueue)", function() {
 
 	var $foo = jQuery("#foo");
 	var w = 0;
-	$foo.hide().width(200).width();
+	$foo.hide().css( "width", 200 ).css("width");
 
-	$foo.animate({ width: "show" }, 1000);
-	$foo.animate({ width: "hide" }, 1000);
-	$foo.animate({ width: "show" }, 1000);
+	$foo.animate({ "width": "show" }, 1000);
+	$foo.animate({ "width": "hide" }, 1000);
+	$foo.animate({ "width": "show" }, 1000);
 	setTimeout(function(){
-		var nw = $foo.width();
-		ok( nw != w, "An animation occurred " + nw + "px " + w + "px");
+		var nw = $foo.css("width");
+		ok( parseFloat( nw ) != w, "An animation occurred " + nw + " " + w + "px");
 		$foo.stop(true);
 
-		nw = $foo.width();
-		ok( nw != w, "Stop didn't reset the animation " + nw + "px " + w + "px");
+		nw = $foo.css("width");
+		ok( parseFloat( nw ) != w, "Stop didn't reset the animation " + nw + " " + w + "px");
 
 		equal( $foo.queue().length, 0, "The animation queue was cleared" );
 		setTimeout(function(){
-			equal( nw, $foo.width(), "The animation didn't continue" );
+			equal( nw, $foo.css("width"), "The animation didn't continue" );
 			start();
 		}, 100);
 	}, 100);
@@ -707,18 +654,18 @@ test("stop(clearQueue, gotoEnd)", function() {
 
 	var $foo = jQuery("#foo");
 	var w = 0;
-	$foo.hide().width(200).width();
+	$foo.hide().css( "width", 200 ).css("width");
 
 	$foo.animate({ width: "show" }, 1000);
 	$foo.animate({ width: "hide" }, 1000);
 	$foo.animate({ width: "show" }, 1000);
 	$foo.animate({ width: "hide" }, 1000);
 	setTimeout(function(){
-		var nw = $foo.width();
-		ok( nw != w, "An animation occurred " + nw + "px " + w + "px");
+		var nw = $foo.css("width");
+		ok( parseFloat( nw ) != w, "An animation occurred " + nw + " " + w + "px");
 		$foo.stop(false, true);
 
-		nw = $foo.width();
+		nw = $foo.css("width");
 		// Disabled, being flaky
 		//equal( nw, 1, "Stop() reset the animation" );
 
@@ -736,14 +683,14 @@ asyncTest( "stop( queue, ..., ... ) - Stop single queues", function() {
 	var foo = jQuery( "#foo" ),
 		saved;
 
-	foo.width( 200 ).height( 200 );
+	foo.css( "width", 200 ).css( "height", 200 );
 	foo.animate({
 		width: 400
 	},{
 		duration: 1000,
 		complete: function() {
-			equal( foo.width(), 400, "Animation completed for standard queue" );
-			equal( foo.height(), saved, "Height was not changed after the second stop");
+			equal( parseFloat( foo.css("width") ), 400, "Animation completed for standard queue" );
+			equal( parseFloat( foo.css("height") ), saved, "Height was not changed after the second stop");
 			start();
 		}
 	});
@@ -755,7 +702,7 @@ asyncTest( "stop( queue, ..., ... ) - Stop single queues", function() {
 		queue: "height"
 	}).dequeue( "height" ).stop( "height", false, true );
 
-	equal( foo.height(), 400, "Height was stopped with gotoEnd" );
+	equal( parseFloat( foo.css("height") ), 400, "Height was stopped with gotoEnd" );
 
 	foo.animate({
 		height: 200
@@ -763,7 +710,7 @@ asyncTest( "stop( queue, ..., ... ) - Stop single queues", function() {
 		duration: 1000,
 		queue: "height"
 	}).dequeue( "height" ).stop( "height", false, false );
-	saved = foo.height();
+	saved = parseFloat( foo.css("height") );
 });
 
 test("toggle()", function() {
@@ -789,6 +736,7 @@ jQuery.checkOverflowDisplay = function(){
 	equal(o, "visible", "Overflow should be visible: " + o);
 	equal(jQuery.css( this, "display" ), "inline", "Display shouldn't be tampered with.");
 
+	jQuery(this).remove();
 	start();
 };
 
@@ -842,6 +790,8 @@ test( "jQuery.fx.prototype.cur() - <1.8 Back Compat", 7, function() {
 		-11000,
 		"support negative values < -10000 (bug #7193)"
 	);
+
+	jQuery( div ).remove();
 });
 
 test("JS Overflow and Display", function() {
@@ -941,16 +891,16 @@ jQuery.each({
 			}
 
 			var num = 0;
-
-			if ( t_h == "show" ) num++;
-			if ( t_w == "show" ) num++;
-			if ( t_w == "hide" || t_w == "show" ) num++;
-			if ( t_h == "hide" || t_h == "show" ) num++;
-			if ( t_o == "hide" || t_o == "show" ) num++;
-			if ( t_w == "hide" ) num++;
-			if ( t_o.constructor == Number ) num += 2;
-			if ( t_w.constructor == Number ) num += 2;
-			if ( t_h.constructor == Number ) num +=2;
+			// TODO: uncrowd this
+			if ( t_h == "show" ) {num++;}
+			if ( t_w == "show" ) {num++;}
+			if ( t_w == "hide" || t_w == "show" ) {num++;}
+			if ( t_h == "hide" || t_h == "show" ) {num++;}
+			if ( t_o == "hide" || t_o == "show" ) {num++;}
+			if ( t_w == "hide" ) {num++;}
+			if ( t_o.constructor == Number ) {num += 2;}
+			if ( t_w.constructor == Number ) {num += 2;}
+			if ( t_h.constructor == Number ) {num +=2;}
 
 			expect( num );
 			stop();
@@ -1002,7 +952,7 @@ jQuery.each({
 				if ( t_o.constructor == Number ) {
 					equal( cur_o, t_o, "Final opacity should be " + t_o + ": " + cur_o );
 
-					ok( jQuery.css(elem, "opacity") != "" || cur_o == t_o, "Opacity should be explicitly set to " + t_o + ", is instead: " + cur_o );
+					ok( jQuery.css(elem, "opacity") !== "" || cur_o == t_o, "Opacity should be explicitly set to " + t_o + ", is instead: " + cur_o );
 				}
 
 				if ( t_w.constructor == Number ) {
@@ -1010,7 +960,7 @@ jQuery.each({
 
 					var cur_w = jQuery.css( elem,"width" );
 
-					ok( elem.style.width != "" || cur_w == t_w, "Width should be explicitly set to " + t_w + ", is instead: " + cur_w );
+					ok( elem.style.width !== "" || cur_w == t_w, "Width should be explicitly set to " + t_w + ", is instead: " + cur_w );
 				}
 
 				if ( t_h.constructor == Number ) {
@@ -1018,7 +968,7 @@ jQuery.each({
 
 					var cur_h = jQuery.css( elem,"height" );
 
-					ok( elem.style.height != "" || cur_h == t_h, "Height should be explicitly set to " + t_h + ", is instead: " + cur_w );
+					ok( elem.style.height !== "" || cur_h == t_h, "Height should be explicitly set to " + t_h + ", is instead: " + cur_h );
 				}
 
 				if ( t_h == "show" ) {
@@ -1055,6 +1005,7 @@ jQuery.fn.saveState = function( hiddenOverflow ) {
 	});
 };
 
+/** @expose */
 jQuery.checkState = function() {
 	var self = this;
 	jQuery.each(this.save, function( c, v ) {
@@ -1153,15 +1104,16 @@ test("jQuery.show('fast') doesn't clear radio buttons (bug #1095)", function () 
 	});
 });
 
-jQuery.each({
+jQuery.expandedEach = jQuery.each;
+jQuery.expandedEach({
 	"slideToggle": function( $elem ) {
-		return $elem.height();
+		return parseFloat( $elem.css("height") );
 	},
 	"fadeToggle": function( $elem ) {
 		return $elem.css("opacity");
 	},
 	"toggle": function( $elem ) {
-		return $elem.width();
+		return parseFloat( $elem.css("width") );
 	}
 },
 function( method, defProp ) {
@@ -1254,17 +1206,17 @@ test("animate with CSS shorthand properties", function(){
 
 	var _default_count = 0,
 		_special_count = 0,
-		propsBasic = { padding: "10 20 30" },
-		propsSpecial = { padding: [ "1 2 3", "_special" ] };
+		propsBasic = { "padding": "10 20 30" },
+		propsSpecial = { "padding": [ "1 2 3", "_special" ] };
 
-	jQuery.easing["_default"] = function(p) {
+	jQuery.easing._default = function(p) {
 		if ( p >= 1 ) {
 			_default_count++;
 		}
 		return p;
 	};
 
-	jQuery.easing["_special"] = function(p) {
+	jQuery.easing._special = function(p) {
 		if ( p >= 1 ) {
 			_special_count++;
 		}
@@ -1289,24 +1241,10 @@ test("animate with CSS shorthand properties", function(){
 			equal( _special_count, 4, "special easing called for each property" );
 
 			jQuery(this).css("padding", "0");
-			delete jQuery.easing["_default"];
-			delete jQuery.easing["_special"];
+			delete jQuery.easing._default;
+			delete jQuery.easing._special;
 			start();
 		});
-});
-
-test("hide hidden elements (bug #7141)", function() {
-	expect(3);
-	QUnit.reset();
-
-	var div = jQuery("<div style='display:none'></div>").appendTo("#qunit-fixture");
-	equal( div.css("display"), "none", "Element is hidden by default" );
-	div.hide();
-	ok( !jQuery._data(div, "olddisplay"), "olddisplay is undefined after hiding an already-hidden element" );
-	div.show();
-	equal( div.css("display"), "block", "Show a double-hidden element" );
-
-	div.remove();
 });
 
 test("hide hidden elements, with animation (bug #7141)", function() {
@@ -1349,7 +1287,7 @@ test( "animate properties missing px w/ opacity as last (#9074)", 2, function() 
 		left: 200,
 		marginLeft: 200,
 		opacity: 0
-	}, 1000);
+	}, 2000);
 	setTimeout(function() {
 		var ml = cssInt( "marginLeft" ),
 			l = cssInt( "left" );
@@ -1359,7 +1297,7 @@ test( "animate properties missing px w/ opacity as last (#9074)", 2, function() 
 		notEqual( l, 200, "Left is not 200 after partial animate" );
 		div.stop().remove();
 		start();
-	}, 100);
+	}, 1000);
 });
 
 test("callbacks should fire in correct order (#9100)", function() {
@@ -1387,7 +1325,7 @@ asyncTest( "callbacks that throw exceptions will be removed (#5684)", function()
 	}
 
 	foo.animate({ height: 1 }, 1, function() {
-		throw new testException;
+		throw new testException();
 	});
 
 	// this test thoroughly abuses undocumented methods - please feel free to update
@@ -1415,46 +1353,60 @@ test("animate will scale margin properties individually", function() {
 	stop();
 
 	var foo = jQuery( "#foo" ).css({
-		margin: 0,
-		marginLeft: 100
+		"margin": 0,
+		"marginLeft": 100
 	});
 
 	ok( foo.css( "marginLeft" ) !== foo.css( "marginRight" ), "Sanity Check" );
 
 	foo.animate({
-		margin: 200
+		"margin": 200
 	}).stop();
 
 	ok( foo.css( "marginLeft") !== foo.css( "marginRight" ), "The margin properties are different");
 
 	// clean up for next test
 	foo.css({
-		marginLeft: '',
-		marginRight: '',
-		marginTop: '',
-		marginBottom: ''
+		"marginLeft": '',
+		"marginRight": '',
+		"marginTop": '',
+		"marginBottom": ''
 	});
 	start();
 });
 
+test("Do not append px to 'fill-opacity' #9548", 1, function() {
+	var $div = jQuery("<div>").appendTo("#qunit-fixture");
+
+	$div.css("fill-opacity", 0).animate({ "fill-opacity": 1.0 }, 0, function () {
+		equal( jQuery(this).css("fill-opacity"), 1, "Do not append px to 'fill-opacity'");
+		$div.remove();
+	});
+});
+
 // Start 1.8 Animation tests
-asyncTest( "jQuery.Animation( object, props, opts )", 1, function() {
+asyncTest( "jQuery.Animation( object, props, opts )", 4, function() {
 	var testObject = {
-			foo: 0,
-			bar: 1,
-			width: 100
+			"foo": 0,
+			"bar": 1,
+			"width": 100
 		},
 		testDest = {
-			foo: 1,
-			bar: 0,
-			width: 200
+			"foo": 1,
+			"bar": 0,
+			"width": 200
 		};
 
-	jQuery.Animation( testObject, testDest, { duration: 1 })
-		.done( function() {
-			deepEqual( testObject, testDest, "Animated foo and bar" );
+	var animation = jQuery.Animation( testObject, testDest, { "duration": 1 });
+	animation.done(function() {
+		for ( var prop in testDest ) {
+			equal( testObject[ prop ], testDest[ prop ], "Animated: " + prop );
+		}
+		animation.done(function() {
+			deepEqual( testObject, testDest, "No unexpected properties" );
 			start();
 		});
+	});
 });
 
 asyncTest( "Animate Option: step: function( percent, tween )", 1, function() {
@@ -1466,8 +1418,10 @@ asyncTest( "Animate Option: step: function( percent, tween )", 1, function() {
 	}, {
 		duration: 1,
 		step: function( value, tween ) {
-			calls = counter[ tween.prop ] = counter[ tween.prop ] || [];
-			calls.push( value );
+			var calls = counter[ tween.prop ] = counter[ tween.prop ] || [];
+			// in case this is called multiple times for either, lets store it in
+			// 0 or 1 in the array
+			calls[ value === 0 ? 0 : 1 ] = value;
 		}
 	}).queue( function( next ) {
 		deepEqual( counter, {
@@ -1596,6 +1550,7 @@ asyncTest( "hide called on element within hidden parent should set display to no
 		strictEqual( elems.get( 1 ).style.display, "none", "hide( 0 ) called on element within hidden parent should set display to none" );
 		strictEqual( elems.get( 2 ).style.display, "none", "hide( 1 ) called on element within hidden parent should set display to none" );
 
+		elems.remove();
 		start();
 	});
 });
@@ -1709,3 +1664,169 @@ asyncTest( "multiple unqueued and promise", 4, function() {
 		start();
 	});
 });
+
+asyncTest( "animate does not change start value for non-px animation (#7109)", 1, function() {
+	var parent = jQuery( "<div><div></div></div>" ).css({ width: 284, height: 1 }).appendTo( "#qunit-fixture" ),
+		child = parent.children().css({ fontSize: "98.6in", width: "0.01em", height: 1 }),
+		actual = parseFloat( child.css( "width" ) ),
+		computed = [];
+
+	child.animate({ width: "0%" }, {
+		duration: 1,
+		step: function() {
+			computed.push( parseFloat( child.css( "width" ) ) );
+		}
+	}).queue( function( next ) {
+		var ratio = computed[ 0 ] / actual;
+		ok( ratio > 0.9 && ratio < 1.1 , "Starting width was close enough" );
+		next();
+		parent.remove();
+		start();
+	});
+});
+
+asyncTest( "non-px animation handles non-numeric start (#11971)", 2, function() {
+	var foo = jQuery("#foo"),
+		initial = foo.css("backgroundPositionX");
+
+	if ( !initial ) {
+		expect(1);
+		ok( true, "Style property not understood" );
+		start();
+		return;
+	}
+
+	foo.animate({ backgroundPositionX: "42%" }, {
+		duration: 1,
+		progress: function( anim, percent ) {
+			if ( percent ) {
+				return;
+			}
+
+			if ( parseFloat( initial ) ) {
+				equal( jQuery.style( this, "backgroundPositionX" ), initial, "Numeric start preserved" );
+			} else {
+				equal( jQuery.style( this, "backgroundPositionX" ), "0%", "Non-numeric start zeroed" );
+			}
+		},
+		done: function() {
+			equal( jQuery.style( this, "backgroundPositionX" ), "42%", "End reached" );
+			start();
+		}
+	});
+});
+
+asyncTest("Animation callbacks (#11797)", 15, function() {
+	var targets = jQuery("#foo").children(),
+		done = false,
+		expectedProgress = 0;
+
+	targets.eq( 0 ).animate( {}, {
+		duration: 1,
+		start: function() {
+			ok( true, "empty: start" );
+		},
+		progress: function( anim, percent ) {
+			equal( percent, 0, "empty: progress 0" );
+		},
+		done: function() {
+			ok( true, "empty: done" );
+		},
+		fail: function() {
+			ok( false, "empty: fail" );
+		},
+		always: function() {
+			ok( true, "empty: always" );
+			done = true;
+		}
+	});
+
+	ok( done, "empty: done immediately" );
+
+	done = false;
+	targets.eq( 1 ).animate({
+		opacity: 0
+	}, {
+		duration: 1,
+		start: function() {
+			ok( true, "stopped: start" );
+		},
+		progress: function( anim, percent ) {
+			equal( percent, 0, "stopped: progress 0" );
+		},
+		done: function() {
+			ok( false, "stopped: done" );
+		},
+		fail: function() {
+			ok( true, "stopped: fail" );
+		},
+		always: function() {
+			ok( true, "stopped: always" );
+			done = true;
+		}
+	}).stop();
+
+	ok( done, "stopped: stopped immediately" );
+
+	targets.eq( 2 ).animate({
+		opacity: 0
+	}, {
+		duration: 1,
+		start: function() {
+			ok( true, "async: start" );
+		},
+		progress: function( anim, percent ) {
+			// occasionally the progress handler is called twice in first frame.... *shrug*
+			if ( percent === 0 && expectedProgress === 1 ) {
+				return;
+			}
+			equal( percent, expectedProgress, "async: progress " + expectedProgress );
+			// once at 0, once at 1
+			expectedProgress++;
+		},
+		done: function() {
+			ok( true, "async: done" );
+		},
+		fail: function() {
+			ok( false, "async: fail" );
+		},
+		always: function() {
+			ok( true, "async: always" );
+			start();
+		}
+	});
+});
+
+test( "Animate properly sets overflow hidden when animating width/height (#12117)", 4, function() {
+	jQuery.each( [ "height", "width" ], function( _, prop ) {
+		jQuery.each( [ 100, 0 ], function( _, value ) {
+			var div = jQuery("<div>"),
+				props = {};
+			props[ prop ] = value;
+			div.animate( props, 1 );
+			equal( div.css( "overflow" ), "hidden",
+				"overflow: hidden set when animating " + prop + " to " + value );
+			div.stop();
+		});
+	});
+});
+
+test( "Animations with 0 duration don't ease (#12273)", 1, function() {
+	jQuery.easing.test = function() {
+		ok( false, "Called easing" );
+	};
+
+	jQuery( "#foo" ).animate({
+		height: 100
+	}, {
+		duration: 0,
+		easing: "test",
+		complete: function() {
+			equal( jQuery( this ).height(), 100, "Height is 100" );
+		}
+	});
+
+	delete jQuery.easing.test;
+});
+
+} // if ( jQuery.fx )

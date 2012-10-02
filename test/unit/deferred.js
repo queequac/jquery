@@ -8,7 +8,7 @@ jQuery.each( [ "", " - new operator" ], function( _, withNew ) {
 
 	test("jQuery.Deferred" + withNew, function() {
 
-		expect( 21 );
+		expect( 23 );
 
 		var defer = createDeferred();
 
@@ -39,7 +39,24 @@ jQuery.each( [ "", " - new operator" ], function( _, withNew ) {
 			strictEqual( value , "done" , "Passed function executed" );
 		});
 
-		jQuery.each( "resolve reject".split( " " ), function( _, change ) {
+		createDeferred(function( defer ) {
+			var promise = defer.promise(),
+				func = function() {},
+				funcPromise = defer.promise( func );
+			strictEqual( defer.promise(), promise, "promise is always the same" );
+			strictEqual( funcPromise, func, "non objects get extended" );
+			jQuery.each( promise, function( key, value ) {
+				if ( !jQuery.isFunction( promise[ key ] ) ) {
+					ok( false, key + " is a function (" + jQuery.type( promise[ key ] ) + ")" );
+				}
+				if ( promise[ key ] !== func[ key ] ) {
+					strictEqual( func[ key ], promise[ key ], key + " is the same" );
+				}
+			});
+		});
+
+		jQuery.expandedEach = jQuery.each;
+		jQuery.expandedEach( "resolve reject".split( " " ), function( _, change ) {
 			createDeferred( function( defer ) {
 				strictEqual( defer.state(), "pending", "pending after creation" );
 				var checked = 0;
@@ -58,14 +75,15 @@ jQuery.each( [ "", " - new operator" ], function( _, withNew ) {
 	});
 } );
 
+
 test( "jQuery.Deferred - chainability", function() {
 
-	var methods = "resolve reject notify resolveWith rejectWith notifyWith done fail progress always".split( " " ),
-		defer = jQuery.Deferred();
+	var defer = jQuery.Deferred();
 
-	expect( methods.length );
+	expect( 10 );
 
-	jQuery.each( methods, function( _, method ) {
+	jQuery.expandedEach = jQuery.each;
+	jQuery.expandedEach( "resolve reject notify resolveWith rejectWith notifyWith done fail progress always".split( " " ), function( _, method ) {
 		var object = { m: defer[ method ] };
 		strictEqual( object.m(), object, method + " is chainable" );
 	});
@@ -324,16 +342,20 @@ test( "jQuery.when" , function() {
 		strictEqual( this, context, "when( promise ) propagates context" );
 	});
 
-	var cache, i;
+	var cache;
 
-	for( i = 1 ; i < 4 ; i++ ) {
+	jQuery.each([ 1, 2, 3 ], function(k, i) {
+
 		jQuery.when( cache || jQuery.Deferred( function() {
-			this.resolve( i );
-		}) ).done(function( value ) {
-			strictEqual( value , 1 , "Function executed" + ( i > 1 ? " only once" : "" ) );
+				this.resolve( i );
+			})
+		).done(function( value ) {
+
+			strictEqual( value, 1 , "Function executed" + ( i > 1 ? " only once" : "" ) );
 			cache = value;
 		});
-	}
+
+	});
 });
 
 test("jQuery.when - joined", function() {
@@ -369,10 +391,10 @@ test("jQuery.when - joined", function() {
 				shouldError = willError[ id1 ] || willError[ id2 ],
 				shouldNotify = willNotify[ id1 ] || willNotify[ id2 ],
 				expected = shouldResolve ? [ 1, 1 ] : [ 0, undefined ],
-			    expectedNotify = shouldNotify && [ willNotify[ id1 ], willNotify[ id2 ] ],
-			    code = id1 + "/" + id2,
-			    context1 = defer1 && jQuery.isFunction( defer1.promise ) ? defer1 : undefined,
-			    context2 = defer2 && jQuery.isFunction( defer2.promise ) ? defer2 : undefined;
+					expectedNotify = shouldNotify && [ willNotify[ id1 ], willNotify[ id2 ] ],
+					code = id1 + "/" + id2,
+					context1 = defer1 && jQuery.isFunction( defer1.promise ) ? defer1 : undefined,
+					context2 = defer2 && jQuery.isFunction( defer2.promise ) ? defer2 : undefined;
 
 			jQuery.when( defer1, defer2 ).done(function( a, b ) {
 				if ( shouldResolve ) {
